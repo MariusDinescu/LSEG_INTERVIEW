@@ -1,7 +1,6 @@
-<<<<<<< HEAD
 # LSEG Chatbot
 
-This project is a chatbot-style web application built with Flask and HTML/JavaScript. It allows users to:
+This project is a chatbot-style web application built with Flask and HTML/JavaScript.
 
 Features
 - Select one of 3 stock exchanges (LSEG, NASDAQ, NYSE)
