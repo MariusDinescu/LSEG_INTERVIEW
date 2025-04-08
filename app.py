@@ -1,10 +1,10 @@
 from flask import Flask, render_template, request, jsonify, session
-import json
+import json, os
 
 app = Flask(__name__)
-app.secret_key = 'supersecretkey'
+app.secret_key = os.urandom(24)
 
-# Load your JSON file
+# Load JSON file
 with open('stock_data.json') as f:
     stock_data = json.load(f)
 
@@ -20,7 +20,7 @@ def chat():
     selected_exchange = session.get('selected_exchange')
     selected_stock = session.get('selected_stock')
 
-    # Step 1: Select stock exchange
+    # Select stock exchange
     if state == 'start':
         if user_input in stock_data:
             session['selected_exchange'] = user_input
@@ -30,7 +30,7 @@ def chat():
         else:
             return jsonify({'bot': "Invalid exchange. Please select one of the listed exchanges."})
 
-    # Step 2: Select stock
+    # Select stock
     elif state == 'stock_selection':
         for stock in stock_data[selected_exchange]:
             if stock['name'] == user_input:
@@ -42,7 +42,7 @@ def chat():
                 })
         return jsonify({'bot': "Invalid stock. Please select one from the list."})
 
-    # Step 3: Final options
+    # Final options
     elif state == 'final':
         if user_input == "Main menu":
             session.clear()

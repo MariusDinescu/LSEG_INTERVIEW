@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>LSEG Chatbot</title>
-  <link rel="stylesheet" href="/static/style.css"> <!-- Referința către fișierul CSS extern -->
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
   <div class="header">🤖 LSEG chatbot</div>
@@ -73,8 +73,7 @@
         sendBtn.click();
       }
     });
-
-    // start initial message
+    
     appendMessage("Hello! Welcome to LSEG. I'm here to help you.", 'bot');
     appendMessage("Please select a Stock Exchange.", 'bot', {{ exchanges | tojson }});
   </script>
