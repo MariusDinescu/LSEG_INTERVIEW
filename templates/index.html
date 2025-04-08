@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LSEG Chatbot</title>
+  <link rel="stylesheet" href="/static/style.css"> <!-- Referința către fișierul CSS extern -->
+</head>
+<body>
+  <div class="header">🤖 LSEG chatbot</div>
+
+  <div id="chatBox"></div>
+
+  <div id="inputArea">
+    <input id="userInput" type="text" placeholder="Please pick an option." />
+    <button id="sendBtn">➤</button>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById('chatBox');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    const appendMessage = (text, sender = 'bot', options = []) => {
+      const div = document.createElement('div');
+      div.className = 'message ' + sender;
+      div.innerText = text;
+
+      if (sender === 'bot' && options.length > 0) {
+        const optionContainer = document.createElement('div');
+        optionContainer.style.marginTop = '0.75rem';
+
+        options.forEach(option => {
+          const button = document.createElement('button');
+          button.className = 'option-btn';
+          button.innerText = option;
+          button.onclick = () => sendUserInput(option);
+          optionContainer.appendChild(button);
+        });
+
+        div.appendChild(optionContainer);
+      }
+
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    };
+
+    const sendUserInput = async (input) => {
+      appendMessage(input, 'user');
+
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({user_input: input})
+      });
+
+      const data = await res.json();
+
+      setTimeout(() => {
+        appendMessage(data.bot, 'bot', data.options || []);
+      }, 500);
+    };
+
+    sendBtn.onclick = () => {
+      const input = userInput.value.trim();
+      if (input) {
+        sendUserInput(input);
+        userInput.value = '';
+      }
+    };
+
+    userInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        sendBtn.click();
+      }
+    });
+
+    // start initial message
+    appendMessage("Hello! Welcome to LSEG. I'm here to help you.", 'bot');
+    appendMessage("Please select a Stock Exchange.", 'bot', {{ exchanges | tojson }});
+  </script>
+</body>
+</html>
