@@ -4,14 +4,15 @@ import json, os
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
-# Load JSON file
-with open('stock_data.json') as f:
+# load JSON file
+with open('stock.json') as f:
     stock_data = json.load(f)
 
 @app.route('/')
 def index():
     session.clear()
-    return render_template('index.html', message="Hello! Welcome to LSEG. I'm here to help you.", exchanges=list(stock_data.keys()))
+    exchanges = [exchange['stockExchange'] for exchange in stock_data]
+    return render_template('index.html', message="Hello! Welcome to LSEG. I'm here to help you.", exchanges=exchanges)
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -20,36 +21,39 @@ def chat():
     selected_exchange = session.get('selected_exchange')
     selected_stock = session.get('selected_stock')
 
-    # Select stock exchange
+    # select stock exchange
     if state == 'start':
-        if user_input in stock_data:
+        exchange = next((ex for ex in stock_data if ex['stockExchange'] == user_input), None)
+        if exchange:
             session['selected_exchange'] = user_input
             session['state'] = 'stock_selection'
-            options = [stock['name'] for stock in stock_data[user_input]]
+            options = [stock['stockName'] for stock in exchange['topStocks']]
             return jsonify({'bot': f"You selected {user_input}. Please select a stock:", 'options': options})
         else:
             return jsonify({'bot': "Invalid exchange. Please select one of the listed exchanges."})
 
-    # Select stock
+    # select stock
     elif state == 'stock_selection':
-        for stock in stock_data[selected_exchange]:
-            if stock['name'] == user_input:
+        exchange = next((ex for ex in stock_data if ex['stockExchange'] == selected_exchange), None)
+        for stock in exchange['topStocks']:
+            if stock['stockName'] == user_input:
                 session['selected_stock'] = user_input
                 session['state'] = 'final'
                 return jsonify({
-                    'bot': f"Stock Price of {stock['name']} is ${stock['price']}.",
+                    'bot': f"Stock Price of {stock['stockName']} is ${stock['price']}.",
                     'options': ["Main menu", "Go Back"]
                 })
         return jsonify({'bot': "Invalid stock. Please select one from the list."})
 
-    # Final options
+    # final options
     elif state == 'final':
         if user_input == "Main menu":
             session.clear()
-            return jsonify({'bot': "Back to main menu. Please select a Stock Exchange.", 'options': list(stock_data.keys())})
+            return jsonify({'bot': "Back to main menu. Please select a Stock Exchange.", 'options': [ex['stockExchange'] for ex in stock_data]})
         elif user_input == "Go Back":
             session['state'] = 'stock_selection'
-            options = [stock['name'] for stock in stock_data[selected_exchange]]
+            exchange = next((ex for ex in stock_data if ex['stockExchange'] == selected_exchange), None)
+            options = [stock['stockName'] for stock in exchange['topStocks']]
             return jsonify({'bot': "Please select a stock:", 'options': options})
         else:
             return jsonify({'bot': "Invalid option. Please select Main menu or Go Back."})
