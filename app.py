@@ -40,7 +40,7 @@ def chat():
                 session['selected_stock'] = user_input
                 session['state'] = 'final'
                 return jsonify({
-                    'bot': f"Stock Price of {stock['stockName']} is ${stock['price']}.",
+                    'bot': f"Stock Price of {stock['stockName']} is {stock['price']}.",
                     'options': ["Main menu", "Go Back"]
                 })
         return jsonify({'bot': "Invalid stock. Please select one from the list."})
