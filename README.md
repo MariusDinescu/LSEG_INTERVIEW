@@ -25,8 +25,4 @@ pip install flask
 
 
 ### 3. Run the app
-
 python app.py
-=======
-# LSEG_INTERVIEW
->>>>>>> a7af204cd819b66d96abeb5a66fccf9a0b72d6d0
